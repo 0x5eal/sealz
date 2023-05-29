@@ -1,7 +1,9 @@
 #![feature(let_chains)]
 
+use colored::Colorize;
 use std::{collections::HashMap, net::SocketAddr};
 use tide::{Endpoint, Result};
+
 
 pub enum ReqType {
     GET,
@@ -15,6 +17,7 @@ where
     pub to_expose: bool,
     pub exposed_port: Option<u16>,
     pub bulk_routes: Option<HashMap<&'a str, T>>,
+    pub scope: &'a str,
 }
 
 /// This struct may be public, but is for internal use only.
@@ -38,13 +41,29 @@ impl Server {
             ReqType::GET => route_addr.get(handler),
             ReqType::POST => route_addr.post(handler),
         };
+
+        println!(
+            "{} :: added route {} to routes collection",
+            "[framework]".bold(),
+            route.blue().underline()
+        );
     }
 
-    pub async fn expose(&self, port: u16) -> Result<()> {
+    pub async fn expose(&self, scope: &str, port: u16) -> Result<()> {
         self.instance
             .clone()
             .listen(SocketAddr::from(([127, 0, 0, 1], port)))
-            .await?;
+            .await
+            .and_then(|entry| {                
+                println!(
+                    "{} :: {} service listening at port {}",
+                    "[framework]".bold(),
+                    scope.green(),
+                    port.to_string().yellow().bold()
+                );      
+
+                Ok(entry)
+            })?;
 
         Ok(())
     }
@@ -56,6 +75,11 @@ pub async fn setup_server(
     let mut server = Server::new();
 
     if let Some(routes_map) = opts.bulk_routes {
+        println!(
+            "{} :: setting up server...",
+            "[framework_bootstrapper]".bold()
+        );
+
         for (route, handler) in routes_map {
             let meta: Vec<&str> = route.split("::").collect();
 
@@ -73,7 +97,7 @@ pub async fn setup_server(
     }
 
     if opts.to_expose && let Some(port) = opts.exposed_port {
-        server.expose(port).await?;
+        server.expose(opts.scope, port).await?;
     }
 
     Ok(server)

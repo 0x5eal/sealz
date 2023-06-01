@@ -4,6 +4,7 @@
 use framework::{setup_server, ServerOptions, Server};
 
 mod api;
+pub mod utils;
 
 pub async fn init() -> tide::Result<Server> {
     let server = setup_server(ServerOptions {

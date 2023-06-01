@@ -1,7 +1,8 @@
 use rand::Rng;
 use serde_json::Value;
 use std::{fs, string::String};
-use tide::{prelude::*, Body, Request, Response, Result};
+use tide::{prelude::*, Request, Result};
+use crate::utils::{build_response, ResponseOptions};
 
 #[derive(Deserialize)]
 #[serde(default)]
@@ -29,27 +30,6 @@ fn get_random_seal(seal_type: String) -> std::result::Result<String, std::io::Er
     seals_vec = seals_vec.drain_filter(|v| v.contains(&seal_type)).collect();
 
     Ok((&seals_vec[rand::thread_rng().gen_range(0..seals_vec.len())]).clone())
-}
-
-struct ResponseOptions<T>
-where
-    T: Into<Body>,
-{
-    status: u16,
-    content_type: &'static str,
-    contents: T,
-}
-
-fn build_response<T>(opts: ResponseOptions<T>) -> Response
-where
-    T: Into<Body>,
-{
-    let mut resp = Response::new(opts.status);
-
-    resp.append_header("Content-Type", opts.content_type);
-    resp.set_body(opts.contents);
-
-    return resp;
 }
 
 pub async fn handler(req: Request<()>) -> Result {

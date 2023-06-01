@@ -3,6 +3,7 @@
 use colored::Colorize;
 use std::{collections::HashMap, net::SocketAddr};
 use tide::{Endpoint, Result};
+use tide_tracing::TraceMiddleware;
 
 pub enum ReqType {
     GET,
@@ -26,7 +27,7 @@ pub struct Server {
 impl Server {
     pub fn new() -> Self {
         Self {
-            instance: tide::new(),
+            instance: (&*tide::new().with(TraceMiddleware::new())).to_owned(),
         }
     }
 
@@ -38,9 +39,9 @@ impl Server {
             ReqType::POST => route_addr.post(handler),
         };
 
-        println!(
-            "{} :: added route {} to routes collection",
-            "[framework]".bold(),
+        tracing::info!(
+            target: "framework",
+            "added route {} to routes collection",
             route.blue().underline()
         );
     }
@@ -51,9 +52,9 @@ impl Server {
             .listen(SocketAddr::from(([127, 0, 0, 1], port)))
             .await
             .and_then(|entry| {
-                println!(
-                    "{} :: {} service listening at port {}",
-                    "[framework]".bold(),
+                tracing::info!(
+                    target: "framework",
+                    "{} service listening at port {}",
                     scope.green(),
                     port.to_string().yellow().bold()
                 );
@@ -71,9 +72,9 @@ pub async fn setup_server(
     let mut server = Server::new();
 
     if let Some(routes_map) = opts.bulk_routes {
-        println!(
-            "{} :: setting up server...",
-            "[framework_bootstrapper]".bold()
+        tracing::info!(
+            target: "framework::bootstrapper",
+            "setting up server...",
         );
 
         for (route, handler) in routes_map {
@@ -83,7 +84,14 @@ pub async fn setup_server(
                 "GET" => ReqType::GET,
                 "POST" => ReqType::POST,
 
-                &_ => panic!("framework::setup_serer::bulk_routes -> invalid request method type"),
+                &_ => {
+                    tracing::info!(
+                        target: "framework::bootstrapper",
+                        "invalid route method type",
+                    );
+
+                    std::process::exit(1);
+                }
             };
 
             let route = meta[1];

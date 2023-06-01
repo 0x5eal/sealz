@@ -15,6 +15,8 @@ async fn main() {
         .with_max_level((&*tracing_level).to_owned())
         .init();
 
+    better_panic::install();
+
     let backend_service = match backend::init().await {
         Ok(server) => server,
         Err(err) => {

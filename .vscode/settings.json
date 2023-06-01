@@ -3,5 +3,6 @@
         "./framework/Cargo.toml",
         "./backend/Cargo.toml",
         "./Cargo.toml"
-    ]
+    ],
+    "rust-analyzer.showUnlinkedFileNotification": false
 }

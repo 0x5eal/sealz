@@ -4,16 +4,12 @@ use colored::Colorize;
 use std::{collections::HashMap, net::SocketAddr};
 use tide::{Endpoint, Result};
 
-
 pub enum ReqType {
     GET,
     POST,
 }
 
-pub struct ServerOptions<'a, T>
-where
-    T: Endpoint<()>,
-{
+pub struct ServerOptions<'a, T> {
     pub to_expose: bool,
     pub exposed_port: Option<u16>,
     pub bulk_routes: Option<HashMap<&'a str, T>>,
@@ -54,13 +50,13 @@ impl Server {
             .clone()
             .listen(SocketAddr::from(([127, 0, 0, 1], port)))
             .await
-            .and_then(|entry| {                
+            .and_then(|entry| {
                 println!(
                     "{} :: {} service listening at port {}",
                     "[framework]".bold(),
                     scope.green(),
                     port.to_string().yellow().bold()
-                );      
+                );
 
                 Ok(entry)
             })?;

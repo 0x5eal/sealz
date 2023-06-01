@@ -8,3 +8,7 @@ edition = "2021"
 [dependencies]
 framework = { path = "../framework" }
 tide = "0.16.0"
+anymap = { git = "https://github.com/CompeyDev/signals-rs.git", rev = "8a650a1" }
+serde_json = "1.0.96"
+serde = { version = "1.0.163", features = ["derive"] }
+rand = "0.8.5"

@@ -1,5 +1,4 @@
 #![feature(associated_type_bounds)]
-#![feature(drain_filter)]
 
 use framework::{setup_server, ServerOptions, Server};
 

@@ -27,7 +27,7 @@ fn get_random_seal(seal_type: String) -> std::result::Result<String, std::io::Er
         seals_vec.push(seal?.path().into_os_string().into_string().unwrap());
     }
 
-    seals_vec = seals_vec.drain_filter(|v| v.contains(&seal_type)).collect();
+    seals_vec = seals_vec.into_iter().filter(|v| v.contains(&seal_type)).collect();
 
     Ok((&seals_vec[rand::thread_rng().gen_range(0..seals_vec.len())]).clone())
 }
